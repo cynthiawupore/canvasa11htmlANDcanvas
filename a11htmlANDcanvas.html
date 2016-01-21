@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+</head>
+<style>
+	#canvas-wrapper{
+		width: 1200px;
+		height: 800px;
+		position: relative;
+		margin:50px auto;
+	}
+	#canvas{
+		border: 1px #ddd solid;
+	}
+	#controller{
+		position: absolute;
+		top:30px;
+		left:30px;
+		background:rgba(0,85,116,0.7);
+		padding:5px 20px 25px 20px;
+		border-radius: 10px 10px;
+	}
+	#controller h1{
+		color: white;
+		font-weight: bold;
+		font-family: "Microsoft Yahei";
+	}
+	#controller #canvas-btn{
+		display: inline-block;
+		background: #8b0;
+		color: white;
+		font-size: 14px;
+		padding: 5px 15px;
+	}
+	#controller #canvas-btn:hover{
+		text-decoration: none;
+		background:#7a0;
+	}
+	#controller .color-btn{
+		display: inline-block;
+		padding:5px 15px;
+		border-radius: 6px 6px;
+		font-size: 14px;
+		margin-top: 10px;
+		margin-right: 5px;
+		text-decoration: none;
+	}
+	#controller .color-btn:hover{
+		text-decoration: none;
+	}
+	#controller #white-color-btn{
+		background-color: white;
+	}
+	#controller #black-color-btn{
+		background-color: black;
+	}
+</style>
+<body>
+	<div id="canvas-wrapper">
+		<canvas id="canvas">
+			当前游览器不支持Canvas,请更换游览器再试！
+		</canvas>
+		<div id="controller">
+			<h1>Canvas 绘图之旅</h1>
+			<a href="#" id="canvas-btn">stop</a>
+			<a href="#" class="color-btn" id="white-color-btn">white</a>
+			<a href="#" class="color-btn" id="black-color-btn">black</a>
+		</div>
+	</div>
+
+	<script>
+		var balls = [];
+		var isMoving = true;
+		var themeColor = "white";
+		var canvas = document.getElementById("canvas");
+
+		window.onload = function(){
+
+			canvas.width = 1200;
+			canvas.height = 800;
+			
+			if(canvas.getContext('2d')){
+				var context = canvas.getContext('2d');
+
+				// 产生100个小球
+				for(var i=0;i<100;i++){
+					var R = Math.floor(Math.random()*255);
+					var G = Math.floor(Math.random()*255);
+					var B = Math.floor(Math.random()*255);
+					var radius = Math.random()*50+20;
+
+					aBall = {
+						color : "rgb(" + R + "," + G + "," + B + ")",
+						radius : radius,
+						x : Math.random()*(canvas.width-2*radius) + radius,
+						y : Math.random()*(canvas.height-2*radius) + radius,
+						vx : (Math.random()*5 + 5) * Math.pow(-1,Math.floor(Math.random()*100)),
+						vy : (Math.random()*5 + 5) * Math.pow(-1,Math.floor(Math.random()*100)),
+					}
+
+					balls[i] = aBall;
+				}
+
+				// 绘制并运动
+				setInterval(function(){
+					draw(context);
+					if(isMoving){
+						update(canvas.width,canvas.height)
+					}
+				},50)
+
+
+				// stop
+				document.getElementById("canvas-btn").onclick = function(event){
+					if(isMoving){
+						isMoving = false;
+						this.text = "start";
+					}else{
+						isMoving = true;
+						this.text = "stop";
+					}
+					return false;
+				} 
+
+				// white
+				document.getElementById("white-color-btn").onclick = function(event){
+					themeColor = "white";
+					return false;
+				}
+
+				// black
+				document.getElementById("black-color-btn").onclick = function(event){
+					themeColor = "black";
+					return false;
+				}
+			}else{
+				alert("当前游览器不支持Canvas,请更换游览器再试！")
+			}
+		}
+
+		function draw(cxt){
+			// var canvas = cxt.canvas;
+			cxt.clearRect(0,0,canvas.width,canvas.height);
+
+			if(themeColor == "black"){
+				console.log("black theme");
+				cxt.fillStyle = "black";
+				cxt.fillRect(0,0,canvas.width,canvas.height)
+			}
+
+			for(var i=0;i<balls.length;i++){
+				cxt.fillStyle = balls[i].color;
+				cxt.beginPath();
+					cxt.arc(balls[i].x,balls[i].y,balls[i].radius,0,Math.PI*2);
+				cxt.closePath();
+				cxt.fill();
+			}
+		}
+
+		function update(){
+			for(var i=0;i<balls.length;i++){
+				balls[i].x += balls[i].vx;
+				balls[i].y += balls[i].vy;
+
+				// 边缘检测
+				if(balls[i].x - balls[i].radius <= 0){
+					balls[i].vx = -balls[i].vx;
+					balls[i].x = balls[i].radius;
+				}
+
+				if(balls[i].x + balls[i].radius >= canvas.width){
+					balls[i].vx = -balls[i].vx;
+					balls[i].x = canvas.width - balls[i].radius;
+				}
+
+				if(balls[i].y - balls[i].radius <= 0){
+					balls[i].vy = -balls[i].vy;
+					balls[i].y = balls[i].radius;
+				}
+
+				if(balls[i].y + balls[i].radius >= canvas.height){
+					balls[i].vy = -balls[i].vy;
+					balls[i].y = canvas.height - balls[i].radius;
+				}
+			}
+		}
+	</script>
+</body>
+</html>
